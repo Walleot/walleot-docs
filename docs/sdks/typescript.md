@@ -30,7 +30,7 @@ const server = new Server({ name: "my-server", version: "0.0.1" });
 // Install Walleot with your API key
 installWalleot(server, {
   apiKey: "YOUR WALLEOT API KEY",
-  paymentFlow: PaymentFlow.ELICITATION,
+  paymentFlow: PaymentFlow.TWO_STEP /* PaymentFlow.ELICITATION PaymentFlow.PROGRESS */
 });
 
 // Register a priced tool
@@ -40,7 +40,7 @@ server.registerTool(
     title: "Add two numbers",
     description: "Adds two numbers and returns the sum.",
     inputSchema: { a: z.number(), b: z.number() },
-    price: { amount: 19, currency: "USD" }, // $0.19 per call
+    price: { amount: 0.19, currency: "USD" }, // $0.19 per call
   },
   async ({ a, b }, extra) => {
     return { content: [{ type: "text", text: String(a + b) }] };
@@ -73,15 +73,15 @@ installWalleot(
 
 ### PaymentFlow Enum
 
-Controls how payments are handled in your MCP server:
+Controls how your MCP Server and the MCP client coordinate the payment process.
 
 ```typescript
 import { PaymentFlow } from "walleot";
 
 // Available options:
-PaymentFlow.ELICITATION    // Default: Ask user before charging
-PaymentFlow.TWO_STEP       // Two-step verification process
-PaymentFlow.PROGRESS       // Progressive payment collection
+PaymentFlow.TWO_STEP       // Default
+PaymentFlow.ELICITATION   
+PaymentFlow.PROGRESS    
 ```
 
 ### Tool Registration with Pricing
@@ -95,7 +95,7 @@ server.registerTool(
     title: "Your Tool Title",
     description: "Your tool description.",
     inputSchema: { /* your schema */ },
-    price: { amount: 25, currency: "USD" }, // $0.25 per call
+    price: { amount: 0.25, currency: "USD" }, // $0.25 per call
   },
   async (args, extra) => {
     // Tool implementation
@@ -105,7 +105,7 @@ server.registerTool(
 ```
 
 **Price Object:**
-- `amount`: Price in cents (e.g., 25 = $0.25)
+- `amount`: Price in dollars (e.g., 0.25 = $0.25)
 - `currency`: Currency code (default: "USD")
 
 ## Examples
@@ -134,7 +134,7 @@ server.registerTool(
       b: z.number(),
       operation: z.enum(["add", "subtract", "multiply", "divide"]),
     },
-    price: { amount: 10, currency: "USD" }, // $0.10 per calculation
+    price: { amount: 0.10, currency: "USD" }, // $0.10 per calculation
   },
   async ({ a, b, operation }, extra) => {
     let result: number;
@@ -173,7 +173,7 @@ server.registerTool(
       text: z.string(),
       operation: z.enum(["uppercase", "lowercase", "reverse", "word_count"]),
     },
-    price: { amount: 5, currency: "USD" }, // $0.05 per operation
+    price: { amount: 0.05, currency: "USD" }, // $0.05 per operation
   },
   async ({ text, operation }, extra) => {
     let result: string;
@@ -239,35 +239,6 @@ Ensure your `tsconfig.json` includes proper module resolution:
 }
 ```
 
-## Error Handling
-
-The SDK handles common errors gracefully:
-
-```typescript
-try {
-  server.registerTool(
-    "risky_operation",
-    {
-      title: "Risky Operation",
-      description: "An operation that might fail.",
-      inputSchema: { data: z.string() },
-      price: { amount: 25, currency: "USD" },
-    },
-    async ({ data }, extra) => {
-      if (!data) {
-        throw new Error("Data cannot be empty");
-      }
-      
-      // Your risky operation here
-      const result = await processData(data);
-      
-      return { content: [{ type: "text", text: result }] };
-    }
-  );
-} catch (error) {
-  console.error("Tool registration failed:", error);
-}
-```
 
 ## Best Practices
 

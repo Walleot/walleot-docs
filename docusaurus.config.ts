@@ -14,6 +14,11 @@ const config: Config = {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
   },
 
+  themes: ['@docusaurus/theme-mermaid'],
+  markdown: {
+    mermaid: true,
+  },
+
   // Set the production url of your site here
   url: 'https://docs.walleot.com',
   // Set the /<baseUrl>/ pathname under which your site is served

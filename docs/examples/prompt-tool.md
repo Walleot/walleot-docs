@@ -20,8 +20,7 @@ import { z } from "zod";
 const server = new Server({ name: "my-server", version: "0.0.1" });
 
 installWalleot(server, {
-  apiKey: "YOUR WALLEOT API KEY",
-  paymentFlow: PaymentFlow.ELICITATION,
+  apiKey: "YOUR WALLEOT API KEY"
 });
 
 server.registerTool(
@@ -30,7 +29,7 @@ server.registerTool(
     title: "Prompt Tool",
     description: "Echoes back your prompt.",
     inputSchema: { prompt: z.string() },
-    price: { amount: 19, currency: "USD" },
+    price: { amount: 0.19, currency: "USD" },
   },
   async ({ prompt }, extra) => {
     return { content: [{ type: "text", text: `You said: ${prompt}` }] };
@@ -50,11 +49,10 @@ mcp = FastMCP("My Server")
 
 walleot = Walleot(
     mcp,
-    apiKey=os.getenv("WALLEOT_API_KEY"),
-    payment_flow=PaymentFlow.ELICITATION,
+    apiKey=os.getenv("WALLEOT_API_KEY")
 )
 
-@walleot.price(0.99, currency="USD")
+@walleot.price(0.19, currency="USD")
 @mcp.tool()
 def prompt_tool(prompt: str, ctx: Context) -> dict:
     return {

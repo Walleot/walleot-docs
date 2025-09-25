@@ -30,13 +30,12 @@ mcp = FastMCP("My AI agent")
 # Initialize Walleot with your API key
 Walleot(
     mcp,
-    apiKey=os.getenv("WALLEOT_API_KEY"),
-    payment_flow=PaymentFlow.ELICITATION
+    apiKey=os.getenv("WALLEOT_API_KEY")
 )
 
 # Define a priced tool
 @mcp.tool()
-@Walleot.price(19, currency="USD")  # $0.19 per call
+@Walleot.price(0.19, currency="USD")  # $0.19 per call
 def add_numbers(a: int, b: int, ctx: Context) -> int:
     """Adds two numbers and returns the sum."""
     return a + b
@@ -54,7 +53,7 @@ The main class for integrating Walleot with your MCP server.
 Walleot(
     mcp_server: FastMCP,
     apiKey: str,
-    payment_flow: PaymentFlow = PaymentFlow.ELICITATION
+    payment_flow: PaymentFlow = PaymentFlow.TWO_STEP # PaymentFlow.ELICITATION PaymentFlow.PROGRESS 
 )
 ```
 
@@ -65,15 +64,15 @@ Walleot(
 
 ### PaymentFlow Enum
 
-Controls how payments are handled in your MCP server:
+Controls how your MCP Server and the MCP client coordinate the payment process.
 
 ```python
 from walleot import PaymentFlow
 
 # Available options:
-PaymentFlow.ELICITATION    # Default: Ask user before charging
-PaymentFlow.TWO_STEP       # Two-step verification process
-PaymentFlow.PROGRESS       # Progressive payment collection
+PaymentFlow.TWO_STEP       # Default
+PaymentFlow.ELICITATION   
+PaymentFlow.PROGRESS      
 ```
 
 ### Pricing Decorator
@@ -90,7 +89,7 @@ def your_tool(param1: str, param2: int, ctx: Context):
 ```
 
 **Parameters:**
-- `amount`: Price in cents (e.g., 19 = $0.19)
+- `amount`: Price in dollars (e.g., 0.19 = $0.19)
 - `currency`: Currency code (default: "USD")
 
 ## Examples
@@ -106,7 +105,7 @@ mcp = FastMCP("Calculator")
 Walleot(mcp, apiKey=os.getenv("WALLEOT_API_KEY"))
 
 @mcp.tool()
-@Walleot.price(10, currency="USD")  # $0.10 per calculation
+@Walleot.price(0.10, currency="USD")  # $0.10 per calculation
 def calculate(a: float, b: float, operation: str, ctx: Context) -> float:
     """Performs basic math operations."""
     if operation == "add":
@@ -135,7 +134,7 @@ mcp = FastMCP("Image Generator")
 Walleot(mcp, apiKey=os.getenv("WALLEOT_API_KEY"))
 
 @mcp.tool()
-@Walleot.price(50, currency="USD")  # $0.50 per image
+@Walleot.price(0.50, currency="USD")  # $0.50 per image
 async def generate_image(prompt: str, ctx: Context) -> Image:
     """Generates an image from a text prompt."""
     # Your image generation logic here
@@ -163,24 +162,6 @@ load_dotenv()
 
 # Access API key
 api_key = os.getenv("WALLEOT_API_KEY")
-```
-
-## Error Handling
-
-The SDK handles common errors gracefully:
-
-```python
-try:
-    @mcp.tool()
-    @Walleot.price(25, currency="USD")
-    def risky_operation(data: str, ctx: Context) -> str:
-        """An operation that might fail."""
-        if not data:
-            raise ValueError("Data cannot be empty")
-        return process_data(data)
-except Exception as e:
-    # Handle errors appropriately
-    print(f"Tool registration failed: {e}")
 ```
 
 ## Best Practices
