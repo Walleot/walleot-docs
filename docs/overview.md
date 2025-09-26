@@ -5,22 +5,41 @@ slug: /
 ---
 
 Walleot makes it simple to **accept payments for AI agents and backend tools** with minimal code.
-Use it to charge for **per‑use**, **subscriptions**, or **premium features**.
+Use it to charge for **per‑use**, **subscriptions** (soon), or **premium features**.
 
 ## Why Walleot for developers
 
 - Build revenue into AI capabilities with a few lines of code.
 - Micro‑payments without a custom billing stack.
-- Auto‑approval thresholds (e.g., ≤ $0.20) reduce friction for small charges.
-- One‑tap 2FA for larger charges, managed by Walleot.
-- Freeze/unfreeze, daily caps, and per‑tool limits via API.
+- Auto‑approval thresholds (e.g., ≤ $0.20) reduce friction for small charges (coming soon).
+- One‑tap 2FA for larger charges, managed by Walleot (coming soon).
 - Sandbox wallets and test keys for fast iteration.
 
 ## How it works
 
-1. Create a charge (per‑call) or subscribe a user (recurring).
-2. Under threshold? Auto‑approved. Over threshold? User receives a 2FA approval.
-3. Your server checks status or receives a webhook and proceeds accordingly.
+- The MCP server receives a request to call your tool. Walleot intercepts this request and generates a payment link.
+- For a new user: Walleot handles a simple 2‑click registration via the link.
+- For a returning user:
+  - Small charges are approved automatically (based on the user’s limits, coming soon).
+  - Larger charges trigger a one‑tap approval link sent to the user.
+- After approval, the tool runs and returns the result back to the client.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant MC as MCP Client (e.g. ChatGPT)
+    participant MS as Your MCP Server
+    participant W as Walleot
+
+    U->>MC: Request
+    MC->>MS: Call tool
+    MS->>W: Request intercepted by Walleot
+    W->>U: Registration / Approval Link
+    U->>W: Approves
+    W->>MS: Return control
+    MS->>MC: Return result
+    MC->>U: Return result
+```
 
 ## Hello, Walleot
 
@@ -38,8 +57,7 @@ import { z } from "zod";
 const server = new Server({ name: "my-server", version: "0.0.1" });
 
 installWalleot(server, {
-  apiKey: "YOUR WALLEOT API KEY",
-  paymentFlow: PaymentFlow.ELICITATION,
+  apiKey: "YOUR WALLEOT API KEY"
 });
 
 server.registerTool(
@@ -48,7 +66,7 @@ server.registerTool(
     title: "Add",
     description: "Add two numbers.",
     inputSchema: { a: z.number(), b: z.number() },
-    price: { amount: 19, currency: "USD" },
+    price: { amount: 0.19, currency: "USD" },
   },
   async ({ a, b }, extra) => {
     return { content: [{ type: "text", text: String(a + b) }] };
@@ -68,11 +86,10 @@ mcp = FastMCP("My Server")
 
 walleot = Walleot(
     mcp,
-    apiKey=os.getenv("WALLEOT_API_KEY"),
-    payment_flow=PaymentFlow.ELICITATION,
+    apiKey=os.getenv("WALLEOT_API_KEY")
 )
 
-@walleot.price(0.99, currency="USD")
+@walleot.price(0.19, currency="USD")
 @mcp.tool()
 def add(a: int, b: int, ctx: Context) -> int:
     return a + b
@@ -84,7 +101,7 @@ def add(a: int, b: int, ctx: Context) -> int:
 ## What you can build
 
 - Pay‑per‑use APIs (e.g., charge \$0.02 per request).
-- Subscription plugins (e.g., \$1/month add‑ons).
+- Subscription plugins (e.g., \$1/month, soon).
 - Premium unlocks (e.g., high‑res image generation).
 
 

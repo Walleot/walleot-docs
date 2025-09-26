@@ -21,11 +21,14 @@ These behaviors are handled by Walleot. Your MCP server only needs to set a pric
 
 Both SDKs support multiple flows via an enum:
 
-- Elicitation (shown in examples)
-- Confirm
-- Progress
+- `TWO_STEP` (shown in examples)
+- `ELICITATION`
+- `PROGRESS`
 
-Pick the flow that best matches your tool UX. For most cases, `PaymentFlow.ELICITATION` is a sensible default.
+Pick the flow that best matches the MCP Clients who will use your MCP Server. For most cases, `PaymentFlow.TWO_STEP` is a sensible default.
+
+The current list of client capabilities can be found here: https://modelcontextprotocol.io/clients
+
 
 ### Example: set flow and price
 
@@ -41,7 +44,7 @@ const server = new Server({ name: "my-server", version: "0.0.1" });
 
 installWalleot(server, {
   apiKey: process.env.WALLEOT_API_KEY!,
-  paymentFlow: PaymentFlow.ELICITATION,
+  paymentFlow: PaymentFlow.TWO_STEP, 
 });
 
 server.registerTool(
@@ -50,7 +53,7 @@ server.registerTool(
     title: "Add",
     description: "Add two numbers.",
     inputSchema: { a: z.number(), b: z.number() },
-    price: { amount: 19, currency: "USD" },
+    price: { amount: 0.19, currency: "USD" },
   },
   async ({ a, b }, extra) => {
     return { content: [{ type: "text", text: String(a + b) }] };
@@ -71,10 +74,10 @@ mcp = FastMCP("My Server")
 walleot = Walleot(
     mcp,
     apiKey=os.getenv("WALLEOT_API_KEY"),
-    payment_flow=PaymentFlow.ELICITATION,
+    payment_flow=PaymentFlow.TWO_STEP,
 )
 
-@walleot.price(0.99, currency="USD")
+@walleot.price(0.19, currency="USD")
 @mcp.tool()
 def add(a: int, b: int, ctx: Context) -> int:
     return a + b
@@ -87,5 +90,5 @@ def add(a: int, b: int, ctx: Context) -> int:
 ## Note
 
 - Add per‑tool prices: see [Quickstart](/quickstart) and [MCP Integration](/integrations/mcp).
-- Share clear pricing in your tool metadata (title/description) so users aren’t surprised.
+- Walleot automatically includes pricing in your tool description, ensuring users are not surprised.
 

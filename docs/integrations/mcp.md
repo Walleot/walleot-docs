@@ -4,7 +4,7 @@ title: Building a Paid MCP Server
 slug: /integrations/mcp
 ---
 
-This guide shows how to build a Python MCP server that charges per call using Walleot via PayMCP.
+This guide shows how to build a Python MCP server that charges per call using Walleot SDK
 
 ## What you need
 
@@ -23,7 +23,7 @@ cd mcp-server-demo
 uv add "mcp[cli]"
 
 # Image generation and payments
-uv add openai paymcp
+uv add openai walleot
 
 # Optional: fetch image bytes, env vars, local resize
 uv add requests python-dotenv Pillow
@@ -45,7 +45,7 @@ Create `server.py`:
 from mcp.server.fastmcp import FastMCP, Context, Image
 
 # Create an MCP server
-mcp = FastMCP("Image generator", capabilities={"elicitation": {}})
+mcp = FastMCP("Image generator")
 
 # Define your AI tool
 @mcp.tool()
@@ -113,7 +113,7 @@ from io import BytesIO
 from PIL import Image as PILImage
 import base64
 
-mcp = FastMCP("Image generator", capabilities={"elicitation": {}})
+mcp = FastMCP("Image generator")
 
 @mcp.tool()
 async def generate(prompt: str, ctx: Context):
@@ -146,21 +146,21 @@ uv run mcp dev server.py
 Install for Claude Desktop (optional):
 
 ```bash
-uv run mcp install server.py --with openai --with paymcp --with requests --with Pillow
+uv run mcp install server.py --with openai --with requests --with Pillow
 ```
 
 ## Add payments
 
-Initialize PayMCP and price your tool in `server.py`:
+Initialize Walleot and price your tool in `server.py`:
 
 ```python
-from paymcp import PayMCP, PaymentFlow, price
+from walleot import Walleot, PaymentFlow, price
 import os
 
 # Payments with Walleot
-PayMCP(
+Walleot(
     mcp,
-    providers={"walleot": {"apiKey": os.getenv("WALLEOT_API_KEY")}},
+    apiKey=os.getenv("WALLEOT_API_KEY"),
     payment_flow=PaymentFlow.ELICITATION  # use TWO_STEP for clients without elicitation
 )
 
@@ -183,16 +183,14 @@ uv run server.py
 Install for Claude Desktop (remember to switch to `PaymentFlow.TWO_STEP` if needed):
 
 ```bash
-uv run mcp install server.py --with openai --with paymcp --with requests --with Pillow
+uv run mcp install server.py --with openai --with walleot --with requests --with Pillow
 ```
 
 ## Troubleshooting
 
 - Missing `OPENAI_API_KEY`: check env vars or `.env`.
 - No image returned: verify model access or try a different model.
-- Payment not triggered: verify `WALLEOT_API_KEY`, `PayMCP` init, and the `@price(...)` decorator.
+- Payment not triggered: verify `WALLEOT_API_KEY`, `Walleot SDK` init, and the `@price(...)` decorator.
 
-## Links
 
-- PayMCP: `https://github.com/blustAI/paymcp`
 

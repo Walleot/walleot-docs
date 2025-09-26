@@ -19,9 +19,10 @@ Get up and running with Walleot in a few minutes.
 
 ## 1) Get API keys
 
-1. Sign in to your Walleot dashboard.
-2. Create a **Test** API key.
-3. Store it as an environment variable (never commit secrets):
+1. Sign in to your [Walleot dashboard](https://app.walleot.com)
+2. Create a new merchant account, or switch to an existing one.
+3. Create a **Test** API key.
+4. Store it as an environment variable (never commit secrets):
 
 ```bash
 export WALLEOT_API_KEY="sk_test_..."
@@ -53,8 +54,7 @@ import { z } from "zod";
 const server = new Server({ name: "my-server", version: "0.0.1" });
 
 installWalleot(server, {
-  apiKey: process.env.WALLEOT_API_KEY!,
-  paymentFlow: PaymentFlow.ELICITATION,
+  apiKey: process.env.WALLEOT_API_KEY!
 });
 
 server.registerTool(
@@ -63,7 +63,7 @@ server.registerTool(
     title: "Add",
     description: "Add two numbers.",
     inputSchema: { a: z.number(), b: z.number() },
-    price: { amount: 19, currency: "USD" }, // $0.19
+    price: { amount: 0.19, currency: "USD" }, // $0.19
   },
   async ({ a, b }, extra) => {
     return { content: [{ type: "text", text: String(a + b) }] };
@@ -87,7 +87,7 @@ walleot = Walleot(
     payment_flow=PaymentFlow.ELICITATION
 )
 
-@walleot.price(0.99, currency="USD")
+@walleot.price(0.19, currency="USD")
 @mcp.tool()
 def add(a: int, b: int, ctx: Context) -> int:
     return a + b
@@ -98,9 +98,29 @@ def add(a: int, b: int, ctx: Context) -> int:
 
 ## 4) What users experience
 
-- New user: 2‑click registration handled by Walleot.
-- Small charges: approved seamlessly.
-- Larger charges: a one‑tap approval prompt is sent to the user.
+- The MCP server receives a request to call your tool. Walleot intercepts this request and generates a payment link.
+- For a new user: Walleot handles a simple 2‑click registration via the link.
+- For a returning user:
+  - Small charges are approved automatically (based on the user’s limits, coming soon).
+  - Larger charges trigger a one‑tap approval link sent to the user.
+- After approval, the tool runs and returns the result back to the client.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant MC as MCP Client (e.g. ChatGPT)
+    participant MS as Your MCP Server
+    participant W as Walleot
+
+    U->>MC: Request (1+3=?)
+    MC->>MS: Call tool
+    MS->>W: Request intercepted by Walleot
+    W->>U: Registration / Approval Link
+    U->>W: Approves
+    W->>MS: Return control
+    MS->>MC: Return result (4)
+    MC->>U: Return result (4)
+```
 
 ## Next steps
 
@@ -112,4 +132,3 @@ def add(a: int, b: int, ctx: Context) -> int:
 - [API Reference](/api/reference) - Complete payment flows
 - [Python SDK](/sdks/python) - Full SDK documentation
 - [TypeScript SDK](/sdks/typescript) - Full SDK documentation
-

@@ -24,8 +24,7 @@ import { z } from "zod";
 const server = new Server({ name: "my-server", version: "0.0.1" });
 
 installWalleot(server, {
-  apiKey: process.env.WALLEOT_API_KEY!,
-  paymentFlow: PaymentFlow.ELICITATION,
+  apiKey: process.env.WALLEOT_API_KEY!
 });
 
 server.registerTool(
@@ -55,8 +54,7 @@ mcp = FastMCP("My Server")
 
 Walleot(
     mcp,
-    apiKey=os.getenv("WALLEOT_API_KEY"),
-    payment_flow=PaymentFlow.ELICITATION,
+    apiKey=os.getenv("WALLEOT_API_KEY")
 )
 
 @Walleot.price(0.10, currency="USD")  # $0.10 per analysis
@@ -153,11 +151,26 @@ def summarize(text: str, ctx: Context) -> str:
 
 ## Payment Flows
 
-Control when users are charged:
+### Payment Flow Options
 
-- **`ELICITATION`**: Ask user before charging (default, recommended)
-- **`TWO_STEP`**: Always require confirmation for higher amounts
-- **`PROGRESS`**: Progressive payment for long-running operations
+How the MCP Server and the MCP Client coordinate the payment process:
+
+> **Note:** Not all MCP Clients support every flow. `TWO_STEP` is the default and most widely supported.
+
+- **`TWO_STEP`** (default, recommended):  
+  Splits the tool into two MCP methods.  
+  • **Step 1:** The tool returns `payment_url` and `payment_id`.  
+  • **Step 2:** The confirmation method verifies the payment and then executes the original logic.
+
+- **`ELICITATION`**:  
+  Uses the MCP elicitation capability to deliver the payment link.  
+  (Note: not yet supported by most clients.)
+
+- **`PROGRESS`**:  
+  Uses the MCP progress update capability to deliver the payment link.  
+  (Note: not yet supported by most clients.)
+
+The current list of client capabilities can be found [here](https://modelcontextprotocol.io/clients).
 
 <Tabs>
 <TabItem value="ts" label="Node.js">
@@ -190,51 +203,6 @@ Walleot(
 - Start low and adjust based on usage
 - Be transparent about what users pay for
 
-### Error Handling
-Only charge for successful operations:
-
-<Tabs>
-<TabItem value="ts" label="Node.js">
-
-```typescript
-server.registerTool(
-  "api_call",
-  {
-    price: { amount: 0.05, currency: "USD" },
-    // ... other config
-  },
-  async ({ query }, extra) => {
-    if (!query) {
-      throw new Error("Query required"); // No charge for validation errors
-    }
-    
-    try {
-      return await externalApiCall(query);
-    } catch (error) {
-      throw new Error(`API failed: ${error.message}`); // No charge for API errors
-    }
-  }
-);
-```
-
-</TabItem>
-<TabItem value="py" label="Python">
-
-```python
-@Walleot.price(0.05, currency="USD")
-@mcp.tool()
-def api_call(query: str, ctx: Context) -> dict:
-    if not query:
-        raise ValueError("Query required")  # No charge for validation errors
-    
-    try:
-        return external_api_call(query)
-    except Exception as e:
-        raise Exception(f"API failed: {str(e)}")  # No charge for API errors
-```
-
-</TabItem>
-</Tabs>
 
 ## Next Steps
 
