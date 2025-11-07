@@ -10,7 +10,7 @@ Charge users per request to an MCP tool by attaching a price.
 
 ```ts
 import { Server } from "@modelcontextprotocol/sdk/server";
-import { installWalleot, PaymentFlow } from "walleot";
+import { installWalleot, Mode } from "walleot";
 import { z } from "zod";
 
 const server = new Server({ name: "my-server", version: "0.0.1" });
@@ -37,7 +37,7 @@ server.registerTool(
 
 ```python
 from mcp.server.fastmcp import FastMCP, Context
-from walleot import Walleot, PaymentFlow
+from walleot import Walleot, Mode
 import os
 
 mcp = FastMCP("My Server")

@@ -18,7 +18,7 @@ Charge users for each tool call in your MCP server. Users pay only for what they
 
 ```typescript
 import { Server } from "@modelcontextprotocol/sdk/server";
-import { installWalleot, PaymentFlow } from "walleot";
+import { installWalleot, Mode } from "walleot";
 import { z } from "zod";
 
 const server = new Server({ name: "my-server", version: "0.0.1" });
@@ -47,7 +47,7 @@ server.registerTool(
 
 ```python
 from mcp.server.fastmcp import FastMCP, Context
-from walleot import Walleot, PaymentFlow
+from walleot import Walleot, Mode
 import os
 
 mcp = FastMCP("My Server")
@@ -149,18 +149,21 @@ def summarize(text: str, ctx: Context) -> str:
 </TabItem>
 </Tabs>
 
-## Payment Flows
+## Modes
 
-### Payment Flow Options
+### Mode Options
 
 How the MCP Server and the MCP Client coordinate the payment process:
 
-> **Note:** Not all MCP Clients support every flow. `TWO_STEP` is the default and most widely supported.
+> **Note:** Not all MCP Clients support every mode. `TWO_STEP` is the default and most widely supported.
 
 - **`TWO_STEP`** (default, recommended):  
   Splits the tool into two MCP methods.  
   • **Step 1:** The tool returns `payment_url` and `payment_id`.  
   • **Step 2:** The confirmation method verifies the payment and then executes the original logic.
+
+- **`RESUBMIT`**:  
+  Adds optional `payment_id` to the tool signature. First call returns HTTP 402 with a payment ID and payment URL; the retry completes original logic once payment is verified
 
 - **`ELICITATION`**:  
   Uses the MCP elicitation capability to deliver the payment link.  
@@ -170,6 +173,9 @@ How the MCP Server and the MCP Client coordinate the payment process:
   Uses the MCP progress update capability to deliver the payment link.  
   (Note: not yet supported by most clients.)
 
+- **`DYNAMIC_TOOLS`**:  
+  Changes the set of tools that are visible at specific points in the interaction.
+
 The current list of client capabilities can be found [here](https://modelcontextprotocol.io/clients).
 
 <Tabs>
@@ -178,7 +184,7 @@ The current list of client capabilities can be found [here](https://modelcontext
 ```typescript
 installWalleot(server, {
   apiKey: process.env.WALLEOT_API_KEY!,
-  paymentFlow: PaymentFlow.ELICITATION, // Change as needed
+  mode: Mode.ELICITATION, // Change as needed
 });
 ```
 
@@ -189,7 +195,7 @@ installWalleot(server, {
 Walleot(
     mcp,
     apiKey=os.getenv("WALLEOT_API_KEY"),
-    payment_flow=PaymentFlow.ELICITATION  # Change as needed
+    mode=Mode.ELICITATION  # Change as needed
 )
 ```
 
@@ -209,5 +215,5 @@ Walleot(
 - [API Reference](/api/reference) - Complete API documentation
 - [Python SDK](/sdks/python) - SDK reference
 - [TypeScript SDK](/sdks/typescript) - SDK reference
-- [Security & Controls](/security-and-controls) - Configure payment flows
+- [Security & Controls](/security-and-controls) - Configure payment coordination mode
 

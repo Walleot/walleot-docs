@@ -17,34 +17,36 @@ Walleot manages approvals and authentication as part of the MCP payment flow.
 
 These behaviors are handled by Walleot. Your MCP server only needs to set a price on each tool (see Quickstart and MCP Integration).
 
-## Payment flows
+## Modes
 
-Both SDKs support multiple flows via an enum:
+Both SDKs support multiple modes via an enum:
 
-- `TWO_STEP` (shown in examples)
+- `TWO_STEP` (default)
+- `RESUBMIT`
 - `ELICITATION`
 - `PROGRESS`
+- `DYNAMIC_TOOLS`
 
-Pick the flow that best matches the MCP Clients who will use your MCP Server. For most cases, `PaymentFlow.TWO_STEP` is a sensible default.
+Pick the mode that best matches the MCP Clients who will use your MCP Server. For most cases, `Mode.TWO_STEP` is a sensible default.
 
 The current list of client capabilities can be found here: https://modelcontextprotocol.io/clients
 
 
-### Example: set flow and price
+### Example: set mode and price
 
 <Tabs>
 <TabItem value="ts" label="Node.js">
 
 ```ts
 import { Server } from "@modelcontextprotocol/sdk/server";
-import { installWalleot, PaymentFlow } from "walleot";
+import { installWalleot, Mode } from "walleot";
 import { z } from "zod";
 
 const server = new Server({ name: "my-server", version: "0.0.1" });
 
 installWalleot(server, {
   apiKey: process.env.WALLEOT_API_KEY!,
-  paymentFlow: PaymentFlow.TWO_STEP, 
+  mode: Mode.TWO_STEP, 
 });
 
 server.registerTool(
@@ -66,7 +68,7 @@ server.registerTool(
 
 ```python
 from mcp.server.fastmcp import FastMCP, Context
-from walleot import Walleot, PaymentFlow
+from walleot import Walleot, Mode
 import os
 
 mcp = FastMCP("My Server")
@@ -74,7 +76,7 @@ mcp = FastMCP("My Server")
 walleot = Walleot(
     mcp,
     apiKey=os.getenv("WALLEOT_API_KEY"),
-    payment_flow=PaymentFlow.TWO_STEP,
+    mode=Mode.TWO_STEP,
 )
 
 @walleot.price(0.19, currency="USD")
