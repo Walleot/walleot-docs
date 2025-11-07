@@ -7,7 +7,7 @@ slug: /sdks/typescript
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-The Walleot TypeScript SDK enables you to integrate payment functionality into your MCP (Model Context Protocol) servers. This guide covers installation, initialization, pricing tools, and payment flows.
+The Walleot TypeScript SDK enables you to integrate payment functionality into your MCP (Model Context Protocol) servers. This guide covers installation, initialization, pricing tools, and payment coordination modes.
 
 ## Installation
 
@@ -21,7 +21,7 @@ Here's how to get started with the TypeScript SDK in an MCP server:
 
 ```typescript
 import { Server } from "@modelcontextprotocol/sdk/server";
-import { installWalleot, PaymentFlow } from "walleot";
+import { installWalleot, Mode } from "walleot";
 import { z } from "zod";
 
 // Initialize your MCP server
@@ -30,7 +30,7 @@ const server = new Server({ name: "my-server", version: "0.0.1" });
 // Install Walleot with your API key
 installWalleot(server, {
   apiKey: "YOUR WALLEOT API KEY",
-  paymentFlow: PaymentFlow.TWO_STEP /* PaymentFlow.ELICITATION PaymentFlow.PROGRESS */
+  mode: Mode.TWO_STEP /* Mode.RESUBMIT / Mode.ELICITATION / Mode.PROGRESS / Mode.DYNAMIC_TOOLS */
 });
 
 // Register a priced tool
@@ -61,7 +61,7 @@ installWalleot(
   server: Server,
   options: {
     apiKey: string;
-    paymentFlow?: PaymentFlow;
+    mode?: Mode;
   }
 ): void
 ```
@@ -69,19 +69,21 @@ installWalleot(
 **Parameters:**
 - `server`: Your MCP Server instance
 - `options.apiKey`: Your Walleot API key (get from dashboard)
-- `options.paymentFlow`: Payment flow behavior (see PaymentFlow enum below)
+- `options.mode`: Mode (see Mode enum below)
 
-### PaymentFlow Enum
+### Mode Enum
 
 Controls how your MCP Server and the MCP client coordinate the payment process.
 
 ```typescript
-import { PaymentFlow } from "walleot";
+import { Mode } from "walleot";
 
 // Available options:
-PaymentFlow.TWO_STEP       // Default
-PaymentFlow.ELICITATION   
-PaymentFlow.PROGRESS    
+Mode.TWO_STEP       // Default
+Mode.RESUBMIT
+Mode.ELICITATION   
+Mode.PROGRESS    
+Mode.DYNAMIC_TOOLS
 ```
 
 ### Tool Registration with Pricing
@@ -114,14 +116,14 @@ server.registerTool(
 
 ```typescript
 import { Server } from "@modelcontextprotocol/sdk/server";
-import { installWalleot, PaymentFlow } from "walleot";
+import { installWalleot, Mode } from "walleot";
 import { z } from "zod";
 
 const server = new Server({ name: "calculator", version: "1.0.0" });
 
 installWalleot(server, {
   apiKey: process.env.WALLEOT_API_KEY!,
-  paymentFlow: PaymentFlow.ELICITATION,
+  mode: Mode.ELICITATION,
 });
 
 server.registerTool(
@@ -253,5 +255,5 @@ Ensure your `tsconfig.json` includes proper module resolution:
 
 - [Quickstart Guide](/quickstart) - Get up and running quickly
 - [MCP Integration Guide](/integrations/mcp) - Detailed integration tutorial
-- [Security and Controls](/security-and-controls) - Payment flow configuration
+- [Security and Controls](/security-and-controls) - Payment coordination mode configuration
 - [API Reference](/api/reference) - Complete API documentation

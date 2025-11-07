@@ -7,7 +7,7 @@ slug: /sdks/python
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-The Walleot Python SDK enables you to integrate payment functionality into your MCP (Model Context Protocol) servers. This guide covers installation, initialization, pricing tools, and payment flows.
+The Walleot Python SDK enables you to integrate payment functionality into your MCP (Model Context Protocol) servers. This guide covers installation, initialization, pricing tools, and payment coordination modes.
 
 ## Installation
 
@@ -21,7 +21,7 @@ Here's how to get started with the Python SDK in an MCP server:
 
 ```python
 from mcp.server.fastmcp import FastMCP, Context
-from walleot import Walleot, PaymentFlow
+from walleot import Walleot, Mode
 import os
 
 # Initialize your MCP server
@@ -53,26 +53,28 @@ The main class for integrating Walleot with your MCP server.
 Walleot(
     mcp_server: FastMCP,
     apiKey: str,
-    payment_flow: PaymentFlow = PaymentFlow.TWO_STEP # PaymentFlow.ELICITATION PaymentFlow.PROGRESS 
+    mode: Mode = Mode.TWO_STEP # Mode.RESUBMIT / Mode.ELICITATION / Mode.PROGRESS / Mode.DYNAMIC_TOOLS
 )
 ```
 
 **Parameters:**
 - `mcp_server`: Your FastMCP server instance
 - `apiKey`: Your Walleot API key (get from dashboard)
-- `payment_flow`: Payment flow behavior (see PaymentFlow enum below)
+- `mode`: Payment coordination mode (see Mode enum below)
 
-### PaymentFlow Enum
+### Mode Enum
 
 Controls how your MCP Server and the MCP client coordinate the payment process.
 
 ```python
-from walleot import PaymentFlow
+from walleot import Mode
 
 # Available options:
-PaymentFlow.TWO_STEP       # Default
-PaymentFlow.ELICITATION   
-PaymentFlow.PROGRESS      
+Mode.TWO_STEP       # Default
+Mode.RESUBMIT
+Mode.ELICITATION   
+Mode.PROGRESS
+Mode.DYNAMIC_TOOLS
 ```
 
 ### Pricing Decorator
@@ -98,7 +100,7 @@ def your_tool(param1: str, param2: int, ctx: Context):
 
 ```python
 from mcp.server.fastmcp import FastMCP, Context
-from walleot import Walleot, PaymentFlow
+from walleot import Walleot, Mode
 
 mcp = FastMCP("Calculator")
 
@@ -124,7 +126,7 @@ def calculate(a: float, b: float, operation: str, ctx: Context) -> float:
 
 ```python
 from mcp.server.fastmcp import FastMCP, Image, Context
-from walleot import Walleot, PaymentFlow
+from walleot import Walleot, Mode
 import base64
 from io import BytesIO
 from PIL import Image as PILImage
@@ -176,5 +178,5 @@ api_key = os.getenv("WALLEOT_API_KEY")
 
 - [Quickstart Guide](/quickstart) - Get up and running quickly
 - [MCP Integration Guide](/integrations/mcp) - Detailed integration tutorial
-- [Security and Controls](/security-and-controls) - Payment flow configuration
+- [Security and Controls](/security-and-controls) - Payment coordination mode configuration
 - [API Reference](/api/reference) - Complete API documentation

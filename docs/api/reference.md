@@ -283,14 +283,14 @@ For MCP servers, use the SDKs for automatic per-call charging:
 
 ```typescript
 import { Server } from "@modelcontextprotocol/sdk/server";
-import { installWalleot, PaymentFlow } from "walleot";
+import { installWalleot, Mode } from "walleot";
 import { z } from "zod";
 
 const server = new Server({ name: "my-server", version: "0.0.1" });
 
 installWalleot(server, {
   apiKey: process.env.WALLEOT_API_KEY!,
-  paymentFlow: PaymentFlow.TWO_STEP, /* Alternatively, you can use PaymentFlow.ELICITATION if MCP Client supports it  */
+  mode: Mode.TWO_STEP, /* Alternatively, you can use mode.ELICITATION if MCP Client supports it  */
 });
 
 server.registerTool(
@@ -313,7 +313,7 @@ server.registerTool(
 
 ```python
 from mcp.server.fastmcp import FastMCP, Context
-from walleot import Walleot, PaymentFlow
+from walleot import Walleot, Mode
 import os
 
 mcp = FastMCP("Analysis Server")
@@ -321,7 +321,7 @@ mcp = FastMCP("Analysis Server")
 Walleot(
     mcp,
     apiKey=os.getenv("WALLEOT_API_KEY"),
-    payment_flow=PaymentFlow.TWO_STEP # Alternatively, you can use PaymentFlow.ELICITATION if MCP Client supports it 
+    mode=Mode.TWO_STEP # Alternatively, you can use Mode.ELICITATION if MCP Client supports it 
 )
 
 @Walleot.price(0.50, currency="USD")  # $0.50 per call
@@ -403,7 +403,7 @@ except requests.exceptions.RequestException as e:
 
 ## Types & enums
 
-- **PaymentFlow**: `TWO_STEP` (default), `ELICITATION`, `PROGRESS`
+- **Mode**: `TWO_STEP` (default), `RESUBMIT`, `ELICITATION`, `PROGRESS`, `DYNAMIC_TOOLS`
 - **Node price shape**: `{ amount: number, currency: string }` (amount in USD dollars, converted under the hood)
 - **Python decorator**: `@walleot.price(amount: float, currency: str)` (dollars)
 

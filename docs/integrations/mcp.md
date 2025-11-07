@@ -154,14 +154,14 @@ uv run mcp install server.py --with openai --with requests --with Pillow
 Initialize Walleot and price your tool in `server.py`:
 
 ```python
-from walleot import Walleot, PaymentFlow, price
+from walleot import Walleot, Mode, price
 import os
 
 # Payments with Walleot
 Walleot(
     mcp,
     apiKey=os.getenv("WALLEOT_API_KEY"),
-    payment_flow=PaymentFlow.ELICITATION  # use TWO_STEP for clients without elicitation
+    mode=Mode.ELICITATION  # use TWO_STEP for clients without elicitation
 )
 
 @mcp.tool()
@@ -172,19 +172,13 @@ async def generate(prompt: str, ctx: Context):
 
 Once `WALLEOT_API_KEY` is set, your MCP will request payment before running the tool.
 
-## Run as a server or install in a client
-
-Run as a server:
+## Run 
 
 ```bash
 uv run server.py
 ```
 
-Install for Claude Desktop (remember to switch to `PaymentFlow.TWO_STEP` if needed):
 
-```bash
-uv run mcp install server.py --with openai --with walleot --with requests --with Pillow
-```
 
 ## Troubleshooting
 
